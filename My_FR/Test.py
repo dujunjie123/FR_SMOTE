@@ -1,5 +1,6 @@
 import numpy as np
-a=[1,2,3,4,5,6,7,8,9]
+import My_FR.tool as tool
 
-
-b = np.array(a).reshape(3, 3).tolist()
+data = tool.read_KEEL_data("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat",14)
+print(data.shape)
+print(data.loc[0].values[0:-1])
