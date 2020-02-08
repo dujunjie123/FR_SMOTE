@@ -2,6 +2,7 @@ import csv
 import math
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 import sklearn
 # from sklearn.metrics import precision_recall_curve
 # #决策树的基本操作
@@ -68,11 +69,47 @@ def my_data(dir):
     data = data_no_title(data)
     return data
 
+# 读取keel中的数据
+# path:数据的路径  # "C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat"
+# begain:数据开始的行数
+def read_KEEL_data(path, begin=0):
+    data = pd.read_table(path, sep=",", skiprows=begin, header=None)
+    return data
+
+# dataframe数据的单位化
+def unitilize_data(dataFrame):
+    newDataFrame = pd.DataFrame(index=dataFrame.index)
+    columns = dataFrame.columns.tolist()[0:-1]
+    tag = dataFrame.columns.tolist()[-1]
+    for c in columns:
+        d = dataFrame[c]
+        MAX = d.max()
+        MIN = d.min()
+        newDataFrame[c] = ((d - MIN) / (MAX - MIN)).tolist()
+    newDataFrame[tag] = dataFrame[tag]
+    return newDataFrame
+
+# 计算df数据的距离矩阵
+def cal_df_dist(df):
+    n, m = df.shape
+    dist = np.zeros((n, n), np.float16)
+    for x in range(n):
+        for y in range(0, x):
+            temp_dist = np.linalg.norm(df.loc[x].values[0:-1] - df.loc[y].values[0:-1])
+            dist[x][y] = temp_dist
+            dist[y][x] = temp_dist
+    return dist
+
+
+# print(unitilize_data(read_KEEL_data("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat", 14)))
+
+
 def my_k_edge(k, dir):
     data = my_data(dir)
     dist = cal_dist(np.array(data).reshape(150, 4))
     E = k_edge(k, dist)
     return E
+
 
 #绘制二维向量的散点图
 # data 是np
