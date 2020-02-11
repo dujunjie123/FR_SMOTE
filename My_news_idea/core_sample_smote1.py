@@ -27,6 +27,11 @@ from sklearn.cluster import DBSCAN
 import My_FR.my_FruchtermannReingold as my_fr
 import My_FR.tool as tool
 
+# class My_Data():
+#     def __init__(self, path):
+#         self.path = path
+
+
 data = []
 for i in range(200):
     data.append(random.normalvariate(1, 0.5))
@@ -72,18 +77,26 @@ def draw(data):
 #原始数据
 draw(data)
 
+#返回各个簇中心点的坐标和标签
+#返回数据的数据类型[[1,2,1],[0,3,0],.....]
 def mean_list(data):
     print("mean_list")
     mean_list = []
     clustering = DBSCAN(eps=0.2, min_samples=3).fit(data[:, 0:2])
+    #clustering.labels_表示各个样本的簇号
     print("clustering.labels_",clustering.labels_)
+    #获取最大的簇号，就能知道分成几个簇
     max_cluster = max(clustering.labels_)
+
+    #遍历簇号，找到对应簇号的样本，根据簇中的样本标签推测相应簇中心的标签
     for i in range(max_cluster):
         indexs = np.argwhere(clustering.labels_ == i).reshape(1, -1)[0]
+        print("indexs",indexs)
         x_list = [x[0] for x in data[indexs]]
         y_list = [x[1] for x in data[indexs]]
         label = np.mean([x[2] for x in data[indexs]])#这里获取一个聚类中心周围点标签的情况
         mean_label = 0
+        #标签是0或者1
         if label >= 0.5:  #如果1的标签多于1/2，则中心点就为1
             mean_label = 1
         means = [np.mean(x_list), np.mean(y_list), mean_label]
@@ -110,7 +123,8 @@ mean_data = mean_list(data)
 #这是原始数据
 # mean_data = data
 #使用力导模型处理数据
-fr_data = fr(np.array(mean_data).reshape(len(mean_data), 3)[:, 0:2].tolist())
+print("data:", np.array(mean_data).reshape(len(mean_data), 3)[:, 0:-1])
+fr_data = fr(np.array(mean_data).reshape(len(mean_data), 3 )[:, 0:-1])
 fr_data_list = fr_data.tolist()
 for i in range(len(fr_data_list)):  #把新生成的力导模型和标签叠加在一起，形成移动过后的带有标签的中心点
     fr_data_list[i].append(mean_data[i][2])
@@ -164,10 +178,9 @@ print(baseline1)
 # baseline2 = confusion_matrix(y_test, base_tree2.predict(X_test))
 # print(baseline2)
 
-
 #训练fr数据
 tree_fr = tree.DecisionTreeClassifier()
 base_tree1 = tree_fr.fit(x_smote_resampled_fr, y_smote_resampled_fr)
 # base_tree2 = tree.fit(X_train1, y_train1)
 baseline2 = confusion_matrix(y_test, base_tree1.predict(X_test))
-print(baseline2)
+print("baseline2:", baseline2)

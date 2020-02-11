@@ -39,19 +39,20 @@ def unitized_vector(vertor):
     return vertor
 
 #计算距离矩阵,计算的矩阵是下三角矩阵，因为距离矩阵为对称阵
-#data 是np的n*m维的矩阵
+#data 是dataframe带标签数据
 def cal_dist(data):
     n, m = data.shape
     dist = np.zeros((n, n), np.float16)
     for x in range(n):
         for y in range(0, x):
-            temp_dist = np.linalg.norm(data[x][:] - data[y][:])
+            temp_dist = np.linalg.norm(data.iloc[x, 0:-1] - data.iloc[y, 0:-1])
             dist[x][y] = temp_dist
             dist[y][x] = temp_dist
+    print("dist:",dist)
     return dist
 
 #计算k近邻
-#k为距离，dist为距离矩阵
+#k为距离，dist为(np)距离矩阵
 #返回：[[NUM_OF_v1,NUM_OF_v2],...]
 def k_edge(k, dist):
     E = []
@@ -61,6 +62,14 @@ def k_edge(k, dist):
             if dist[x][y] < k :
                 E.append([x, y])
     return E
+
+# 计算距离矩阵,计算的矩阵是下三角矩阵，因为距离矩阵为对称阵
+# 并且计算k近邻
+# data: df数据类型
+# k:k近邻
+# 返回：距离小于k的点对的列表， [[1,4],[3,7],...]
+def get_edge(data,k):
+    return k_edge(k, cal_dist(data))
 
 #返回的是相应单位化后的数据
 def my_data(dir):
@@ -88,6 +97,16 @@ def unitilize_data(dataFrame):
         newDataFrame[c] = ((d - MIN) / (MAX - MIN)).tolist()
     newDataFrame[tag] = dataFrame[tag]
     return newDataFrame
+
+#计算dataframe 每列的均值
+#return 均值的列表
+def col_df_mean(df):
+    col = df.columns.tolist()
+    mean_list = []
+    for c in col:
+        # print(np.mean(np.array(df[c])).__class__)
+        mean_list.append(np.mean(np.array(df[c])))
+    return mean_list
 
 # 计算df数据的距离矩阵
 def cal_df_dist(df):
@@ -134,6 +153,10 @@ def position_with_border(v1, v2, border0, border1):
     # elif value00*value11 < 0 :
     #     status =
     return status
+
+#计算dataframe每一列的均值
+
+
 
 # a = my_k_edge(0.3, "D:/pythonWorkspace/data/iris.csv")
 # print(a)

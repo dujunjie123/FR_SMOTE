@@ -29,6 +29,7 @@ import My_FR.tool as tool
 
 
 # 获取数据的中心点，并给中心点添加标签
+# data :
 def mean_list(data):
     mean_list = []
     #获取密度聚类的模型
@@ -47,18 +48,7 @@ def mean_list(data):
         mean_list.append(means)
     return mean_list
 
-#力导模型
-#输出的不带标签的np数据
-def fr(data):
-    size_of_data = len(data)
-    np.set_printoptions(suppress=True)
-    new_dist = tool.cal_dist(np.array(data).reshape(size_of_data, 2))
-    E = tool.k_edge(1, new_dist)
-    graph_data = (data, E)
-    graph = my_fr.FruchtermannReingold('', graph_data[0], graph_data[1], 30, 5, 10, 0.4, 0.02)
-    # 新的数据
-    value = graph.draw()
-    return value
+
 
 # 中心点数据
 # data 为 dataframe 数据
@@ -67,6 +57,7 @@ def fr(data):
 # return 返回各个簇中心点的坐标和标签 返回数据的数据类型(np)[[1,2,1],[0,3,0],.....]
 # 只能进行二分类
 def get_cent_point(data, eps=0.2, min_samples = 3):
+    np.set_printoptions(suppress=True)
     data = pd.get_dummies(data).iloc[:, 0:-1]
     data_point = data.iloc[:, 0:-1]
     data_label = data.iloc[:,-1]
@@ -87,14 +78,35 @@ def get_cent_point(data, eps=0.2, min_samples = 3):
         cent_point = tool.col_df_mean(x)
         cent_point.append(cent_label)
         mean_list.append(cent_point)
-    return np.array(mean_list)
+    return np.around(mean_list, decimals=5)
 
+cent_point = get_cent_point(tool.unitilize_data(tool.read_KEEL_data("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat", 14)))
+print("cent_point:", cent_point)
 
-print(get_cent_point(tool.read_KEEL_data("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat", 14)))
+print("k近邻：", tool.get_edge(pd.DataFrame(cent_point),0.9))
+#力导模型
+#data: 带标签的dataframe 数据
+#输出的带标签的dataframe 数据
+# vertices:向量, edges：向量之间边的关系, iterations：迭代次数, temperature=退火的温度,
+# attractive_force：引力, repulsive_force：斥力, speed：迭代的次数
+def fr(data, iterations=30, temperature=5,
+        attractive_force=10, repulsive_force=0.4, speed=0.02):
+    size_of_data = len(data)
+    np.set_printoptions(suppress=True)
+    new_dist = tool.cal_dist(np.array(data).reshape(size_of_data, 2))
+    E = tool.k_edge(1, new_dist)
+    graph_data = (data, E)
+    graph = my_fr.FruchtermannReingold('', graph_data[0], graph_data[1], iterations, temperature,
+                                       attractive_force, repulsive_force, speed)
+    # 新的数据
+    value = graph.draw()
+    return value
+
 
 # 获取使用力导模型和smote处理后的中心点数据
 # mean_list : 中心点的列表
 # def get_worked_data(mean_list):
+
 
 
 #训练模型，并预测
