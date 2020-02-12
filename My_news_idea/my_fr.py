@@ -4,10 +4,10 @@ import pandas as pd
 #对原fr算法进行多维化改造
 class multi_d_FR(My_FR.FruchtermannReingold):
 
-    def __init__(self,title, vertices, edges, iterations, temperature,
-        attractive_force, repulsive_force, speed):
+    def __init__(self, title, vertices, edges, iterations, temperature,
+                 attractive_force, repulsive_force, speed):
         super().__init__(title, vertices, edges, iterations, temperature,
-        attractive_force, repulsive_force, speed)
+                         attractive_force, repulsive_force, speed)
 
     def algorithm_step(self):
         # Initialization of forces
@@ -53,8 +53,11 @@ class multi_d_FR(My_FR.FruchtermannReingold):
         for v in range(m):
             disp = self.forces[v]
             mod_disp = self.norm(disp)
+            # print("position_head:", self.positions[v])
             self.positions[v] = self.sum(self.positions[v], self.mult(
-                self.div(disp, mod_disp), min(mod_disp, self.temperature)))
+                self.div(disp, mod_disp),
+                min(mod_disp, self.temperature)))
+            # print("position_end:", self.positions[v])
         # Cool
         self.temperature = self.cool()
 

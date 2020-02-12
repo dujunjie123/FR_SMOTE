@@ -36,8 +36,9 @@ class FruchtermannReingold:
 
     def init_vertices(self):
         # Initialization of vertices positions
+        m, n = self.vertices.shape
         to_ret = []
-        for i in range(0, len(self.vertices)):
+        for i in range(0, m):
             to_ret.append((i, self.vertices[i]))
         self.positions = dict(to_ret)  #数据结构如下：{0:[1,3],1:[0.5,0.4],...}
 
@@ -59,7 +60,7 @@ class FruchtermannReingold:
     # def mult(self, v1, scalar):
     #     return [x * scalar for x in v1]
     def mult(self, v1, scalar):
-        return [v1[0] * scalar, v1[1] * scalar*2]
+        return [x * scalar for x in v1]
 
     # 向量单位化，也就是得到力的方向
     # 这个地方可以控制力的方向！！！！！！！！！！！！！！！！！！！！！
