@@ -7,6 +7,8 @@ import time
 
 
 class FruchtermannReingold:
+    # vertices:不带标签的np数据
+    # position：{0:[1,3],1:[0.5,0.4],...}
     def __init__(self, title, vertices, edges, iterations, temperature, 
         attractive_force, repulsive_force, speed):
         self.title = title
@@ -96,6 +98,7 @@ class FruchtermannReingold:
         # Calculation attraction forces
         # edge数据结构：[[v1,v2],...] 表示有边的向量对
         for edge in self.edges:
+            # 在k近邻之间计算相应的引力
             delta = self.sub(self.positions[edge[0]], self.positions[edge[1]])
             mod_delta = self.norm(delta)
             self.forces[edge[0]] = self.sub(self.forces[edge[0]], 
@@ -114,7 +117,7 @@ class FruchtermannReingold:
         #             self.div(disp, mod_disp), min(mod_disp, self.temperature))
         #     )
 
-        for v in range(len(self.vertices)):
+        for v in range(m):
             disp = self.forces[v]
             mod_disp = self.norm(disp)
             self.positions[v] = self.sum(self.positions[v], self.mult(

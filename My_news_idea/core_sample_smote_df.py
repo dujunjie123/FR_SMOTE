@@ -1,30 +1,10 @@
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
 from sklearn import tree
 from sklearn.metrics import confusion_matrix
-from sklearn.datasets import make_classification
 
-import My_news_idea.convert_test_data as newData
-
-from imblearn.under_sampling import RandomUnderSampler
-from imblearn.under_sampling import TomekLinks
-from imblearn.under_sampling import CondensedNearestNeighbour
-from imblearn.under_sampling import OneSidedSelection
-
-from imblearn.over_sampling import RandomOverSampler
-from imblearn.over_sampling import SMOTE
-from imblearn.over_sampling import ADASYN
-from pandas.core.frame import DataFrame
-
-
-import random
 import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.cluster import DBSCAN
-import My_FR.my_FruchtermannReingold as my_fr
+import My_news_idea.my_fr as my_fr
 import My_FR.tool as tool
 
 
@@ -82,26 +62,27 @@ def get_cent_point(data, eps=0.2, min_samples = 3):
 
 cent_point = get_cent_point(tool.unitilize_data(tool.read_KEEL_data("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat", 14)))
 print("cent_point:", cent_point)
+# print("k近邻：", tool.get_edge(pd.DataFrame(cent_point),0.9))
 
-print("k近邻：", tool.get_edge(pd.DataFrame(cent_point),0.9))
-#力导模型
-#data: 带标签的dataframe 数据
-#输出的带标签的dataframe 数据
-# vertices:向量, edges：向量之间边的关系, iterations：迭代次数, temperature=退火的温度,
+# 力导模型
+# data: 带标签的np 数据,
+# 输出的带标签的dataframe 数据
+# terations：迭代次数, temperature=退火的温度,
 # attractive_force：引力, repulsive_force：斥力, speed：迭代的次数
+# k:k近邻
 def fr(data, iterations=30, temperature=5,
-        attractive_force=10, repulsive_force=0.4, speed=0.02):
-    size_of_data = len(data)
+        attractive_force=10, repulsive_force=0.4, speed=0.02, k=0.5):
     np.set_printoptions(suppress=True)
-    new_dist = tool.cal_dist(np.array(data).reshape(size_of_data, 2))
-    E = tool.k_edge(1, new_dist)
-    graph_data = (data, E)
-    graph = my_fr.FruchtermannReingold('', graph_data[0], graph_data[1], iterations, temperature,
+    E = tool.get_edge(pd.DataFrame(data), k)
+    graph_data = (data[:, 0:-1], E)
+    graph = my_fr.multi_d_FR('', graph_data[0], graph_data[1], iterations, temperature,
                                        attractive_force, repulsive_force, speed)
     # 新的数据
     value = graph.draw()
     return value
 
+
+print("fr:",fr(cent_point))
 
 # 获取使用力导模型和smote处理后的中心点数据
 # mean_list : 中心点的列表
@@ -125,8 +106,6 @@ def main(path, began):
     # 读取df类型的归一化数据
     my_data = tool.unitilize_data(tool.read_KEEL_data(path, began))
     # 准备训练数据和测试数据
-
-
     # 使用fr模型和smote模型数理数据，形成新的数据
     # 使用处理完成的数据，进行建模，并预测
 

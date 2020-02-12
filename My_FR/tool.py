@@ -67,11 +67,11 @@ def k_edge(k, dist):
 # 并且计算k近邻
 # data: df数据类型
 # k:k近邻
-# 返回：距离小于k的点对的列表， [[1,4],[3,7],...]
+# return：距离小于k的点对的列表， [[1,4],[3,7],...]
 def get_edge(data,k):
     return k_edge(k, cal_dist(data))
 
-#返回的是相应单位化后的数据
+# 返回的是相应单位化后的数据
 def my_data(dir):
     data = np.array(read_csv(dir)).reshape(151, 6)
     # data = unitized_vector(data_no_title(data))

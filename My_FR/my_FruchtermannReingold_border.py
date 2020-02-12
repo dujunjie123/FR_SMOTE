@@ -192,7 +192,27 @@ def main2():
     feature2_border = km.kmeans_border(km.kmeans_class(np.array(feature2).reshape(-1, 1), 2))
 
 
-
+def main_df(path, began):
+    np.set_printoptions(suppress=True)
+    data = tool.read_KEEL_data(path, began)
+    #标准化数据
+    data = tool.unitilize_data(data)
+    #计算距离矩阵
+    dist = tool.cal_df_dist(data)
+    #降维
+    V = np.real(mds.MDS(dist, 2)).tolist()
+    new_dist = tool.cal_dist(np.array(V).reshape(100, 2))
+    # print(new_dist[:9:, :9:]-dist[:9:, :9:])
+    E = tool.k_edge(0.5, new_dist)
+    graph_data = (V, E)
+    graph = FruchtermannReingold('', graph_data[0], graph_data[1], 30, 5, 0.5, 4, 0.02)
+    #新的数据
+    value = graph.draw().tolist()
+    # 计算各个特征的边界值
+    feature1 = [x[0] for x in value]
+    feature2 = [x[1] for x in value]
+    feature1_border = km.kmeans_border(km.kmeans_class(np.array(feature1).reshape(-1, 1), 2))
+    feature2_border = km.kmeans_border(km.kmeans_class(np.array(feature2).reshape(-1, 1), 2))
 main2()
 # def test():
 #     x1 = np.random.normal(0, 1, 50)
