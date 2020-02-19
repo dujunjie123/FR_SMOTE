@@ -6,7 +6,10 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 import My_news_idea.my_fr as my_fr
 import My_FR.tool as tool
-
+from imblearn.over_sampling import BorderlineSMOTE as B_SMOTE
+from sklearn.model_selection import train_test_split
+from sklearn import tree
+from sklearn.metrics import confusion_matrix
 
 # 获取数据的中心点，并给中心点添加标签
 # data :
@@ -60,7 +63,7 @@ def get_cent_point(data, eps=0.0001, min_samples = 1):
         mean_list.append(cent_point)
     return np.around(mean_list, decimals=5)
 
-cent_point = get_cent_point(tool.unitilize_data(tool.read_KEEL_data("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat", 14)))
+
 # print("cent_point:", cent_point)
 # print("k近邻：", tool.get_edge(pd.DataFrame(cent_point),0.9))
 
@@ -84,7 +87,18 @@ def fr(data, iterations=30, temperature=5, attractive_force=10, repulsive_force=
     value = np.c_[graph.draw(), data[:, -1]]
     return value
 
-print("fr:", fr(cent_point).shape)
+
+
+
+# 使用平衡过后的数据集训练树模型
+# my_tree = tree.DecisionTreeClassifier()
+#
+# base_tree = my_tree.fit(fr_data_x_smote, fr_data_y_smote)
+#
+# print("混淆矩阵：", confusion_matrix(Y_test, base_tree.predict(X_test)))
+
+
+
 
 # 获取使用力导模型和smote处理后的中心点数据
 # mean_list : 中心点的列表
@@ -100,14 +114,42 @@ def train(x_train, y_train, x_test, y_test):
     print(baseline)
 
 
-
-#path:数据的路径
-#began：数据的起始行数
-def main(path, began):
+# path:数据的路径
+# began：数据的起始行数
+# is_cent_data : 判断是否对数据进行中心化处理,默认0 不进行中心化处理
+def main(path, began, is_cent_data=0, iterations=30, temperature=5, attractive_force=1, repulsive_force=0.4, speed=0.02, k=0.5):
     # 读取数据
     # 读取df类型的归一化数据
     my_data = tool.unitilize_data(tool.read_KEEL_data(path, began))
     # 准备训练数据和测试数据
     # 使用fr模型和smote模型数理数据，形成新的数据
     # 使用处理完成的数据，进行建模，并预测
+    # 是否对数据进行中心化处理
+    if is_cent_data != 0:
+        cent_point = get_cent_point(my_data)
+    else:
+        cent_point = np.array(my_data)
+    fr_data = pd.DataFrame(fr(cent_point,iterations, temperature, attractive_force, repulsive_force, speed, k))
+    fr_data_x = fr_data.iloc[:, 0:-1]
+    fr_data_y = fr_data.iloc[:, -1]
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    # 随机抽取测试数据的训练数据
+    X_train, X_test, Y_train, Y_test = train_test_split(fr_data_x, fr_data_y, test_size=0.3, random_state=42)
+    # 根据抽取的训练数据，生成平衡过后的数据集
+    my_B_SMOTE = B_SMOTE()
+    fr_data_x_smote, fr_data_y_smote = my_B_SMOTE.fit_sample(X_train, Y_train)
 
+    #经过处理的数数据
+    print("经过处理的数据:")
+    train(fr_data_x_smote, fr_data_y_smote, X_test, Y_test)
+
+    #未经处理的数据
+
+    X_train_org, X_test_org, Y_train_org, Y_test_org = train_test_split(my_data.iloc[:, 0:-1], my_data.iloc[:, -1], test_size=0.3, random_state=42)
+
+    data_x_org, data_y_org = my_B_SMOTE.fit_sample(X_train_org,  Y_train_org)
+    print("未处理的数据:")
+    train(data_x_org, data_y_org, X_test_org, Y_test_org)
+
+if __name__ == '__main__':
+    main("C:\\Users\\Administrator\\Desktop\\keel\\glass1.dat", 14, )
